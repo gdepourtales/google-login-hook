@@ -32,7 +32,6 @@ import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -53,6 +52,7 @@ import javax.portlet.PortletURL;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -205,8 +205,8 @@ public class GoogleOAuth extends BaseStrutsAction {
 		HttpTransport httpTransport = new NetHttpTransport();
 		JacksonFactory jsonFactory = new JacksonFactory();
 
-		InputStream is = GoogleOAuth.class.getResourceAsStream(
-			_CLIENT_SECRETS_LOCATION);
+		String secretsLocation = PortalUtil.getPortalProperties().getProperty("google.client.secrets.location");
+		InputStream is = new FileInputStream(secretsLocation);
 
 		GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(
 			jsonFactory, new InputStreamReader(is));
@@ -216,7 +216,7 @@ public class GoogleOAuth extends BaseStrutsAction {
 					httpTransport, jsonFactory, clientSecrets, _SCOPES);
 
 		builder.setAccessType("online");
-		builder.setApprovalPrompt("force");
+		builder.setApprovalPrompt("auto");
 
 		return builder.build();
 	}

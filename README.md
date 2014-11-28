@@ -18,6 +18,11 @@ i.e (http://localhost:8080/c/portal/google_login?cmd=token)
 4. Click the Download JSON button to obtain the file client_secrets.json.
 ![Alt text](/configure-google-app.jpg "Configure Google App")
 
-5. Replace the file client_secrets.json in com.liferay.google with the downloaded file.
+6. Save the client_secrets.json on your server
+
+
+7. Define google.client.secrets.location property in portal-ext.properties with the path to your client_secrets.json
+
 
 Then, you're ready to go. Deploy the hook and enjoy :)
+
