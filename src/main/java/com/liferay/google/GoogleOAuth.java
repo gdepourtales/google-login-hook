@@ -24,7 +24,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.oauth2.Oauth2;
-import com.google.api.services.oauth2.model.Userinfo;
+import com.google.api.services.oauth2.model.Userinfoplus;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.struts.BaseStrutsAction;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
@@ -45,6 +45,7 @@ import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.PortletURLFactoryUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.portlet.PortletMode;
 import javax.portlet.PortletRequest;
@@ -96,7 +97,7 @@ public class GoogleOAuth extends BaseStrutsAction {
 			if (Validator.isNotNull(code)) {
 				Credential credential = exchangeCode(code, redirectUri);
 
-				Userinfo userinfo = getUserInfo(credential);
+				Userinfoplus userinfo = getUserInfo(credential);
 
 				User user = setGoogleCredentials(
 					session, themeDisplay.getCompanyId(), userinfo);
@@ -126,7 +127,7 @@ public class GoogleOAuth extends BaseStrutsAction {
 	}
 
 	protected User addUser(
-			HttpSession session, long companyId, Userinfo userinfo)
+			HttpSession session, long companyId, Userinfoplus userinfo)
 		throws Exception {
 
 		long creatorUserId = 0;
@@ -220,7 +221,7 @@ public class GoogleOAuth extends BaseStrutsAction {
 		return builder.build();
 	}
 
-	protected Userinfo getUserInfo(Credential credentials)
+	protected Userinfoplus getUserInfo(Credential credentials)
 		throws NoSuchUserIdException {
 
 		Oauth2.Builder builder = new Oauth2.Builder(
@@ -228,7 +229,7 @@ public class GoogleOAuth extends BaseStrutsAction {
 
 		Oauth2 oauth2 = builder.build();
 
-		Userinfo userInfo = null;
+		Userinfoplus userInfo = null;
 
 		try {
 			userInfo = oauth2.userinfo().get().execute();
@@ -282,7 +283,7 @@ public class GoogleOAuth extends BaseStrutsAction {
 	}
 
 	protected User setGoogleCredentials(
-			HttpSession session, long companyId, Userinfo userinfo)
+			HttpSession session, long companyId, Userinfoplus userinfo)
 		throws Exception {
 
 		if (userinfo == null) {
@@ -294,8 +295,8 @@ public class GoogleOAuth extends BaseStrutsAction {
 		String emailAddress = userinfo.getEmail();
 
 		if ((user == null) && Validator.isNotNull(emailAddress)) {
-			user = UserLocalServiceUtil.fetchUserByEmailAddress(
-				companyId, emailAddress);
+			user = UserLocalServiceUtil.getUserByEmailAddress(
+					companyId, emailAddress);
 
 			if ((user != null) &&
 				(user.getStatus() != WorkflowConstants.STATUS_INCOMPLETE)) {
@@ -326,7 +327,7 @@ public class GoogleOAuth extends BaseStrutsAction {
 		return user;
 	}
 
-	protected User updateUser(User user, Userinfo userinfo)
+	protected User updateUser(User user, Userinfoplus userinfo)
 		throws Exception {
 
 		String emailAddress = userinfo.getEmail();
@@ -359,7 +360,7 @@ public class GoogleOAuth extends BaseStrutsAction {
 
 		ServiceContext serviceContext = new ServiceContext();
 
-		if (!StringUtil.equalsIgnoreCase(
+		if (!StringUtils.equalsIgnoreCase(
 				emailAddress, user.getEmailAddress())) {
 
 			UserLocalServiceUtil.updateEmailAddress(
@@ -384,7 +385,7 @@ public class GoogleOAuth extends BaseStrutsAction {
 			serviceContext);
 	}
 
-	private final String _CLIENT_SECRETS_LOCATION = "client_secrets.json";
+	private final String _CLIENT_SECRETS_LOCATION = "/client_secrets.json";
 
 	private final String _REDIRECT_URI = "/c/portal/google_login?cmd=token";
 
